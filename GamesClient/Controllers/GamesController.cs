@@ -10,9 +10,9 @@ namespace GamesClient.Controllers
         // GET: GamesController
         public ActionResult Index()
         {
-            IEnumerable<GamesClient.Services.Game> games = new List<GamesClient.Services.Game>();
             var httpClient = new HttpClient();
             var apiClient = new GamesAPIClient(httpClient);
+            var games = apiClient.GamesAllAsync().Result.ToList();
             return View(games);
         }
 

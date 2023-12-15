@@ -26,9 +26,9 @@ namespace GamesClient.Services
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
 
-        public GamesAPIClient(string baseUrl, System.Net.Http.HttpClient httpClient)
+        public GamesAPIClient(System.Net.Http.HttpClient httpClient)
         {
-            BaseUrl = baseUrl;
+            BaseUrl = "http://192.168.1.6:1001";
             _httpClient = httpClient;
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
         }
