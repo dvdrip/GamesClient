@@ -1,7 +1,16 @@
+using GamesClient.Interfaces;
+using GamesClient.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add HttpClient service
+builder.Services.AddHttpClient();
+
+// Register GamesAPIClient with HttpClient dependency
+builder.Services.AddScoped<GamesAPIClient>();
 
 var app = builder.Build();
 

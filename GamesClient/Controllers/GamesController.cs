@@ -1,27 +1,36 @@
 ﻿using GamesClient.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace GamesClient.Controllers
 {
     public class GamesController : Controller
     {
+        private readonly GamesAPIClient _apiClient;
+
+        public GamesController(GamesAPIClient apiClient)
+        {
+            if (apiClient == null)
+            {
+                throw new ArgumentNullException(nameof(apiClient), "The 'apiClient' parameter cannot be null.");
+            }
+
+            _apiClient = apiClient;
+        }
+
         // GET: GamesController
         public async Task<ActionResult> Index()
         {
-            var httpClient = new HttpClient();
-            var apiClient = new GamesAPIClient(httpClient);
-            var games = await apiClient.GamesAllAsync();
+            var games = await _apiClient.GamesAllAsync();
             return View(games);
         }
 
         // GET: GamesController/Details/5
         public async Task<ActionResult> Details(int id)
         {
-            var httpClient = new HttpClient();
-            var apiClient = new GamesAPIClient(httpClient);
-            var game = await apiClient.GamesGETAsync(id);
+            var game = await _apiClient.GamesGETAsync(id);
             return View(game);
         }
 
@@ -34,31 +43,46 @@ namespace GamesClient.Controllers
         // POST: GamesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create(Game game)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                // Check if _apiClient is null before proceeding
+                if (_apiClient == null)
+                {
+                    // Log or handle the situation where _apiClient is unexpectedly null
+                    return View("Error: GamesAPIClient is not initialized.");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    // Use the API client to create the game
+                    await _apiClient.GamesPOSTAsync(game);
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // If ModelState is not valid, return to the create view with validation errors
+                return View(game);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Handle exceptions (e.g., log the error, show an error message)
+                ModelState.AddModelError(string.Empty, "An error occurred while creating the game. Error: " + ex.Message);
+                return View(game);
             }
         }
+
 
         // GET: GamesController/Edit/5
         public async Task<ActionResult> Edit(int id)
         {
             try
             {
-                // Retrieve the game details by ID
-                var httpClient = new HttpClient();
-                var apiClient = new GamesAPIClient(httpClient);
-                var game = await apiClient.GamesGETAsync(id);
+                var game = await _apiClient.GamesGETAsync(id);
 
                 if (game == null)
                 {
-                    // Game not found, return appropriate response (e.g., 404 Not Found)
                     return NotFound();
                 }
 
@@ -66,8 +90,7 @@ namespace GamesClient.Controllers
             }
             catch (Exception ex)
             {
-                // Handle exceptions (e.g., log the error, show an error message)
-                return View("Error");
+                return View("Error: " + ex.Message);
             }
         }
 
@@ -76,12 +99,8 @@ namespace GamesClient.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, Game game)
         {
-            var httpClient = new HttpClient();
-            var apiClient = new GamesAPIClient(httpClient);
-
             if (id != game.GameID)
             {
-                // ID mismatch, return appropriate response (e.g., 400 Bad Request)
                 return BadRequest();
             }
 
@@ -89,20 +108,15 @@ namespace GamesClient.Controllers
             {
                 try
                 {
-                    // Use the API client to update the game
-                    await apiClient.GamesPUTAsync(id, game);
-
-                    // Redirect to the index action after successful update
+                    await _apiClient.GamesPUTAsync(id, game);
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
-                    // Handle exceptions (e.g., log the error, show an error message)
-                    ModelState.AddModelError(string.Empty, "An error occurred while updating the game.");
+                    ModelState.AddModelError(string.Empty, "An error occurred while updating the game. Error: " + ex.Message);
                 }
             }
 
-            // If ModelState is not valid, return to the edit view with validation errors
             return View(game);
         }
 
