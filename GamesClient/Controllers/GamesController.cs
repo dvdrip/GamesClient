@@ -47,24 +47,63 @@ namespace GamesClient.Controllers
         }
 
         // GET: GamesController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
-            return View();
+            try
+            {
+                // Retrieve the game details by ID
+                var httpClient = new HttpClient();
+                var apiClient = new GamesAPIClient(httpClient);
+                var game = await apiClient.GamesGETAsync(id);
+
+                if (game == null)
+                {
+                    // Game not found, return appropriate response (e.g., 404 Not Found)
+                    return NotFound();
+                }
+
+                return View(game);
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions (e.g., log the error, show an error message)
+                return View("Error");
+            }
         }
 
         // POST: GamesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(int id, Game game)
         {
-            try
+            var httpClient = new HttpClient();
+            var apiClient = new GamesAPIClient(httpClient);
+
+            if (id != game.GameID)
             {
-                return RedirectToAction(nameof(Index));
+                // ID mismatch, return appropriate response (e.g., 400 Bad Request)
+                return BadRequest();
             }
-            catch
+
+            if (ModelState.IsValid)
             {
-                return View();
+                try
+                {
+                    // Use the API client to update the game
+                    await apiClient.GamesPUTAsync(id, game);
+
+                    // Redirect to the index action after successful update
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (e.g., log the error, show an error message)
+                    ModelState.AddModelError(string.Empty, "An error occurred while updating the game.");
+                }
             }
+
+            // If ModelState is not valid, return to the edit view with validation errors
+            return View(game);
         }
 
         // GET: GamesController/Delete/5
