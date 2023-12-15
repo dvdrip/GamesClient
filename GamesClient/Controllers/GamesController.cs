@@ -8,18 +8,21 @@ namespace GamesClient.Controllers
     public class GamesController : Controller
     {
         // GET: GamesController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             var httpClient = new HttpClient();
             var apiClient = new GamesAPIClient(httpClient);
-            var games = apiClient.GamesAllAsync().Result.ToList();
+            var games = await apiClient.GamesAllAsync();
             return View(games);
         }
 
         // GET: GamesController/Details/5
-        public ActionResult Details(int id)
+        public async Task<ActionResult> Details(int id)
         {
-            return View();
+            var httpClient = new HttpClient();
+            var apiClient = new GamesAPIClient(httpClient);
+            var game = await apiClient.GamesGETAsync(id);
+            return View(game);
         }
 
         // GET: GamesController/Create
