@@ -5,6 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Configure services
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("ConnectionStrings"));
+
 // Add HttpClient service
 builder.Services.AddHttpClient();
 

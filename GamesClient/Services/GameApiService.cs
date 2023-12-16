@@ -17,6 +17,8 @@
 
 namespace GamesClient.Services
 {
+    using Microsoft.Extensions.Options;
+    using System.Configuration;
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.20.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -25,10 +27,11 @@ namespace GamesClient.Services
         private string _baseUrl = "";
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
+        private readonly string _apiBaseUrl;
 
-        public GamesAPIClient(System.Net.Http.HttpClient httpClient)
+        public GamesAPIClient(System.Net.Http.HttpClient httpClient, IOptions<AppSettings> appSettings)
         {
-            BaseUrl = "http://192.168.1.6:1001";
+            BaseUrl = appSettings.Value.DefaultConnection;
             _httpClient = httpClient;
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
         }
