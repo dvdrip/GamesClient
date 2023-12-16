@@ -27,9 +27,8 @@ namespace GamesClient.Services
         private string _baseUrl = "";
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
-        private readonly string _apiBaseUrl;
 
-        public GamesAPIClient(System.Net.Http.HttpClient httpClient, IOptions<AppSettings> appSettings)
+        public GamesAPIClient(HttpClient httpClient, IOptions<AppSettings> appSettings)
         {
             BaseUrl = appSettings.Value.DefaultConnection;
             _httpClient = httpClient;
